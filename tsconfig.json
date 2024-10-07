@@ -4,7 +4,10 @@
     "moduleResolution": "Node",
     "target": "ES2023",
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "strict": true,
+    "noImplicitAny": true,
+    "removeComments": true
   },
   "include": ["src/**/*"]
 }
