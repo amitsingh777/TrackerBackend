@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "dist",
     "strict": true,
     "noImplicitAny": true,
-    "removeComments": true
+    "removeComments": true,
+    "esModuleInterop": true,
+    "types": ["node", "express"]
   },
   "include": ["src/**/*"]
 }

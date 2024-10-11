@@ -1,7 +1,8 @@
-const express = require("express");
+import express, { NextFunction, Request, Response } from "express";
+import { MongoClient } from "mongodb";
 const app = express();
-const { MongoClient } = require("mongodb");
-const fs = require("fs");
+
+// const fs = require("fs");
 // const { uri } = require("./constants.js");
 const uri =
   "mongodb+srv://amitbrajeshsingh:sfMSQVfhDFWAX0t7@maverick.oarc9.mongodb.net/?retryWrites=true&w=majority&appName=Maverick";
@@ -24,7 +25,7 @@ type test = {};
 //   }
 // }
 // run().catch(console.dir);
-const basicAuth = (req, res, next) => {
+const basicAuth = (req: Request, res: Response, next: NextFunction) => {
   const authorization = req.headers["authorization"];
   next();
 };
