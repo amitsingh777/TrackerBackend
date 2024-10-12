@@ -1,6 +1,8 @@
 import express from "express";
-import { client, COLLECTIONS, DATABASES } from "../../mongoutils";
+import jwt from "jsonwebtoken";
+import { client, COLLECTIONS, DATABASES } from "../../mongoUtils";
 import { checkExistingUser } from "../../utilityFunctions";
+import { JWT_SECRET } from "../../secret";
 const AuthRouter = express.Router();
 
 AuthRouter.post("/v1/login", async (req, res) => {
@@ -17,8 +19,12 @@ AuthRouter.post("/v1/login", async (req, res) => {
 });
 
 AuthRouter.post("/v1/signup", async (req, res) => {
-  const body = req.body;
-  const isExistingUser = await checkExistingUser(body.name);
+  const { name, password, gmail } = req.body;
+  if (!(name && password && gmail)) {
+    res.status(400).send("Please send full user Details");
+    return;
+  }
+  const isExistingUser = await checkExistingUser(name);
   if (isExistingUser) {
     res.status(409).send("Email already in use!");
   } else {
@@ -27,12 +33,16 @@ AuthRouter.post("/v1/signup", async (req, res) => {
         .db(DATABASES.primaryDB)
         .collection(COLLECTIONS.USERS)
         .insertOne({
-          name: body.name,
-          password: body.password,
-          gmail: body.gmail,
+          name: name,
+          password: password,
+          gmail: gmail,
         });
-
-      res.status(200).send("User Created Successfully");
+      const token = jwt.sign(
+        { name, password, gmail },
+        JWT_SECRET.key,
+        JWT_SECRET.config
+      );
+      res.status(200).send({ token: token });
     } catch (e) {
       res
         .status(500)

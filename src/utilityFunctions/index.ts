@@ -1,4 +1,4 @@
-import { client } from "../mongoutils";
+import { client } from "../mongoUtils";
 
 export const checkExistingUser = async (name: string) => {
   const user = await client
