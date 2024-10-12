@@ -1,32 +1,32 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import { client, COLLECTIONS, DATABASES } from "../../mongoUtils";
-import { checkExistingUser } from "../../utilityFunctions";
-import { JWT_SECRET } from "../../secret";
+import express from 'express';
+
+import {client, COLLECTIONS, DATABASES} from '../../mongoUtils';
+import {checkExistingUser, jwtTokenCreation} from '../../utilityFunctions';
+import {JWT_SECRET} from '../../secret';
 const AuthRouter = express.Router();
 
-AuthRouter.post("/v1/login", async (req, res) => {
-  const { name, password } = req.body;
+AuthRouter.post('/v1/login', async (req, res) => {
+  const {name, password} = req.body;
 
   const foundUser = await client
     .db(DATABASES.primaryDB)
     .collection(COLLECTIONS.USERS)
-    .findOne({ name, password });
+    .findOne({name, password});
 
   foundUser
-    ? res.send("You are Authenticated successfully")
-    : res.status(401).send("Unauthorized");
+    ? res.send('You are Authenticated successfully')
+    : res.status(401).send('Unauthorized');
 });
 
-AuthRouter.post("/v1/signup", async (req, res) => {
-  const { name, password, gmail } = req.body;
+AuthRouter.post('/v1/signup', async (req, res) => {
+  const {name, password, gmail} = req.body;
   if (!(name && password && gmail)) {
-    res.status(400).send("Please send full user Details");
+    res.status(400).send('Please send full user Details');
     return;
   }
-  const isExistingUser = await checkExistingUser(name);
+  const isExistingUser = await checkExistingUser(gmail);
   if (isExistingUser) {
-    res.status(409).send("Email already in use!");
+    res.status(409).send('Email already in use!');
   } else {
     try {
       await client
@@ -37,16 +37,19 @@ AuthRouter.post("/v1/signup", async (req, res) => {
           password: password,
           gmail: gmail,
         });
-      const token = jwt.sign(
-        { name, password, gmail },
-        JWT_SECRET.key,
-        JWT_SECRET.config
-      );
-      res.status(200).send({ token: token });
+
+      jwtTokenCreation({name, password, gmail}, (err, token) => {
+        if (err) {
+          res.status(500).send('Please retry after sometime');
+          return;
+        }
+        res.status(200).send({token});
+        return;
+      });
     } catch (e) {
       res
         .status(500)
-        .send("Problem in creating account, please try after sometime.");
+        .send('Problem in creating account, please try after sometime.');
     }
   }
 });
