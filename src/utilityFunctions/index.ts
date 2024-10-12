@@ -2,7 +2,7 @@ import jwt, {SignCallback} from 'jsonwebtoken';
 import {client} from '../mongoUtils';
 import {JWT_SECRET} from '../secret';
 
-type jwtSignPayload = {name: string; password: string; mail: string};
+export type jwtSignPayload = {name: string; password: string; mail: string};
 
 export const checkExistingUser = async (mail: string) => {
   const user = await client

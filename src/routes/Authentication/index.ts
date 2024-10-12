@@ -1,9 +1,24 @@
-import express from 'express';
+import express, {Response} from 'express';
 
 import {client, COLLECTIONS, DATABASES} from '../../mongoUtils';
-import {checkExistingUser, jwtTokenCreation} from '../../utilityFunctions';
+import {
+  checkExistingUser,
+  jwtSignPayload,
+  jwtTokenCreation,
+} from '../../utilityFunctions';
 import {JWT_SECRET} from '../../secret';
 const AuthRouter = express.Router();
+
+const tokenCreationAndRes = (payload: jwtSignPayload, res: Response) => {
+  jwtTokenCreation(payload, (err, token) => {
+    if (err) {
+      res.status(500).send('Please retry after sometime');
+      return;
+    }
+    res.status(200).send({token});
+    return;
+  });
+};
 
 AuthRouter.post('/v1/login', async (req, res) => {
   const {name, password} = req.body;
@@ -13,14 +28,7 @@ AuthRouter.post('/v1/login', async (req, res) => {
     .collection(COLLECTIONS.USERS)
     .findOne({name, password});
   if (foundUser) {
-    jwtTokenCreation({name, password, mail: foundUser.mail}, (err, token) => {
-      if (err) {
-        res.status(500).send('Please retry after sometime');
-        return;
-      }
-      res.status(200).send({token});
-      return;
-    });
+    tokenCreationAndRes({name, password, mail: foundUser.mail}, res);
   } else {
     res.status(401).send('Unauthorized');
     return;
@@ -47,14 +55,7 @@ AuthRouter.post('/v1/signup', async (req, res) => {
           mail: mail,
         });
 
-      jwtTokenCreation({name, password, mail}, (err, token) => {
-        if (err) {
-          res.status(500).send('Please retry after sometime');
-          return;
-        }
-        res.status(200).send({token});
-        return;
-      });
+      tokenCreationAndRes({name, password, mail}, res);
     } catch (e) {
       res
         .status(500)
