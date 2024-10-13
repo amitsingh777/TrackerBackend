@@ -1,6 +1,7 @@
 import jwt, {SignCallback} from 'jsonwebtoken';
-import {client} from '../mongoUtils';
+import {client, COLLECTIONS, DATABASES} from '../mongoUtils';
 import {JWT_SECRET} from '../secret';
+import {NextFunction, Request, Response} from 'express';
 
 export type jwtSignPayload = {name: string; password: string; mail: string};
 
@@ -20,6 +21,36 @@ export const jwtTokenCreation = (
   return jwt.sign(payload, JWT_SECRET.key, JWT_SECRET.config, callback);
 };
 
-// export const jwtTokenVerification = (token) => {
-//   return jwt.verify()
-// };
+export const tokenCreationAndRes = (payload: jwtSignPayload, res: Response) => {
+  jwtTokenCreation(payload, (err, token) => {
+    if (err) {
+      res.status(500).send('Please retry after sometime');
+      return;
+    }
+    res.status(200).send({token});
+    return;
+  });
+};
+
+export const jwtTokenVerification = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const token = req.headers.authorization?.split('Bearer')?.[1]?.trim();
+
+  if (token) {
+    jwt.verify(token, JWT_SECRET.key, (err, decoded) => {
+      if (err) {
+        res.status(401).sendStatus(401);
+        return;
+      } else {
+        req.body.user = decoded;
+        next();
+      }
+    });
+  } else {
+    res.status(401).sendStatus(401);
+    return;
+  }
+};

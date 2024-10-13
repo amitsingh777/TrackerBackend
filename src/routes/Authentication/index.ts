@@ -1,24 +1,9 @@
 import express, {Response} from 'express';
 
 import {client, COLLECTIONS, DATABASES} from '../../mongoUtils';
-import {
-  checkExistingUser,
-  jwtSignPayload,
-  jwtTokenCreation,
-} from '../../utilityFunctions';
-import {JWT_SECRET} from '../../secret';
-const AuthRouter = express.Router();
+import {checkExistingUser, tokenCreationAndRes} from '../../utilityFunctions';
 
-const tokenCreationAndRes = (payload: jwtSignPayload, res: Response) => {
-  jwtTokenCreation(payload, (err, token) => {
-    if (err) {
-      res.status(500).send('Please retry after sometime');
-      return;
-    }
-    res.status(200).send({token});
-    return;
-  });
-};
+const AuthRouter = express.Router();
 
 AuthRouter.post('/v1/login', async (req, res) => {
   const {name, password} = req.body;

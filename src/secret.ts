@@ -7,6 +7,6 @@ export const JWT_SECRET = {
   config: {
     algorithm: 'HS512',
     encoding: 'utf-8',
-    expiresIn: '1h',
+    expiresIn: 60 * 60,
   } as SignOptions,
 };

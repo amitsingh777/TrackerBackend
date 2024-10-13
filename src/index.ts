@@ -1,12 +1,15 @@
-import app from "./expressUtils";
-import AuthRouter from "./routes/Authentication";
+import app from './expressUtils';
+import AuthRouter from './routes/Authentication';
+import {jwtTokenVerification} from './utilityFunctions';
 
 const port = 8000;
 
 app.use(AuthRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.use(jwtTokenVerification);
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
 });
 
 app.listen(port, () => {
