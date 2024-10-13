@@ -2,6 +2,7 @@ import jwt, {SignCallback} from 'jsonwebtoken';
 import {client, COLLECTIONS, DATABASES} from '../mongoUtils';
 import {JWT_SECRET} from '../secret';
 import {NextFunction, Request, Response} from 'express';
+import {decodedJwtUser} from '../types/express';
 
 export type jwtSignPayload = {name: string; password: string; mail: string};
 
@@ -45,7 +46,7 @@ export const jwtTokenVerification = (
         res.status(401).sendStatus(401);
         return;
       } else {
-        req.body.user = decoded;
+        req.user = decoded as decodedJwtUser;
         next();
       }
     });
