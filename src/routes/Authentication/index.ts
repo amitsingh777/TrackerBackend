@@ -22,7 +22,7 @@ AuthRouter.post('/v1/login', async (req, res) => {
 
 AuthRouter.post('/v1/signup', async (req, res) => {
   const {name, password, mail} = req.body;
-  if (!(name && password && mail)) {
+  if (!(name || password || mail)) {
     res.status(400).send('Please send full user Details');
     return;
   }
