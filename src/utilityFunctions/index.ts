@@ -29,6 +29,22 @@ export const tokenCreationAndRes = (payload: jwtSignPayload, res: Response) => {
       return;
     }
     res.status(200).send({token});
+    jwtTokenCreation(payload, async (err, token) => {
+      if (err) {
+        console.log(err);
+      }
+      try {
+        const res = await client
+          .db(DATABASES.primaryDB)
+          .collection(COLLECTIONS.USERS)
+          .updateOne(
+            {mail: {$eq: payload.mail}},
+            {$set: {refresh_token: token}},
+          );
+      } catch (err) {
+        console.log(err);
+      }
+    });
     return;
   });
 };
